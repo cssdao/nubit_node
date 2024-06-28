@@ -6,11 +6,11 @@
 DOCKER_USERNAME="zh30"
 DOCKER_PASSWORD="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"
 DOCKER_REGISTRY="ghcr.io"
-IMAGE_NAME="ghcr.io/cssdao/nubit:latest"
+IMAGE_NAME="ghcr.io/cssdao/nubit_node:latest"
 
 # 检查 nubit:latest 镜像是否存在
-if ! docker image inspect nubit:latest &> /dev/null; then
-    echo "nubit:latest 镜像不存在，正在尝试登录并拉取..."
+if ! docker image inspect $IMAGE_NAME &> /dev/null; then
+    echo "$IMAGE_NAME 镜像不存在，正在尝试登录并拉取..."
     
     # 登录到 Docker 仓库
     echo "$DOCKER_PASSWORD" | docker login $DOCKER_REGISTRY -u "$DOCKER_USERNAME" --password-stdin
@@ -33,17 +33,17 @@ if ! docker image inspect nubit:latest &> /dev/null; then
     
     echo "镜像已成功拉"
 else
-    echo "nubit:latest 镜像已存在，继续执行..."
+    echo "$IMAGE_NAME 镜像已存在，继续执行..."
 fi
 
 # 设置默认容器数量
 DEFAULT_COUNT=50
 
 # 检查是否提供了命令行参数
-if [ $# -eq 0 ]; then
-    CONTAINER_COUNT=$DEFAULT_COUNT
-else
+if [ $# -gt 0 ]; then
     CONTAINER_COUNT=$1
+else
+    CONTAINER_COUNT=$DEFAULT_COUNT
 fi
 
 # 验证输入是否为正整数
@@ -68,10 +68,10 @@ do
     echo "提取 $CONTAINER_NAME 的信息..."
     {
         echo "Container: $CONTAINER_NAME"
-        docker logs $CONTAINER_NAME -n 1000 | grep -A1 "ADDRESS:" | tail -n1
-        docker logs $CONTAINER_NAME -n 1000 | grep -A1 "MNEMONIC" | tail -n1
-        docker logs $CONTAINER_NAME -n 1000 | grep -A1 "\*\* PUBKEY \*\*" | tail -n1
-        docker logs $CONTAINER_NAME -n 1000 | grep -A1 "\*\* AUTH KEY \*\*" | tail -n1
+        docker logs $CONTAINER_NAME | grep -A1 "ADDRESS:" | awk '{print $2}'
+        docker logs $CONTAINER_NAME | grep -A1 "MNEMONIC (save this somewhere safe\!\!\!):" | awk 'NR>1 {print $1}'
+        docker logs $CONTAINER_NAME | grep -A1 "\*\* PUBKEY \*\*" | awk '{print $2}'
+        docker logs $CONTAINER_NAME | grep -A1 "\*\* AUTH KEY \*\*" | awk '{print $2}'
         echo "---"
     } >> keys.md
 done
