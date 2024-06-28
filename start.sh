@@ -62,18 +62,24 @@ do
     docker run -d --name $CONTAINER_NAME $IMAGE_NAME
 
     # 等待容器完全启动和日志生成
-    sleep 25
+    sleep 20
     
     # 提取信息并追加到keys.md
     echo "提取 $CONTAINER_NAME 的信息..."
     {
         echo "Container: $CONTAINER_NAME"
-        docker logs $CONTAINER_NAME | grep -A1 "ADDRESS:" | awk '{print $2}'
-        docker logs $CONTAINER_NAME | grep -A1 "MNEMONIC (save this somewhere safe\!\!\!):" | awk 'NR>1 {print $1}'
-        docker logs $CONTAINER_NAME | grep -A1 "\*\* PUBKEY \*\*" | awk '{print $2}'
-        docker logs $CONTAINER_NAME | grep -A1 "\*\* AUTH KEY \*\*" | awk '{print $2}'
+
+        # 获取容器日志并保存到变量
+        container_logs=$(docker logs $CONTAINER_NAME)
+        echo "address: $(echo "$container_logs" | grep -A1 "ADDRESS:" | awk '{print $2}' )"
+        # docker logs $CONTAINER_NAME | grep -A1 "ADDRESS:" | awk '{print $2}'
+        # docker logs $CONTAINER_NAME | grep -A1 "MNEMONIC (save this somewhere safe\!\!\!):" | awk 'NR>1 {print $1}'
+        # docker logs $CONTAINER_NAME | grep -A1 "\*\* PUBKEY \*\*" | awk '{print $2}'
+        # docker logs $CONTAINER_NAME | grep -A1 "\*\* AUTH KEY \*\*" | awk '{print $2}'
         echo "---"
     } >> keys.md
+
+    sleep 2
 done
 
 echo "所有容器已启动并记录完成!私钥信息已经在 keys.md 文件中，请谨慎保存。"
