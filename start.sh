@@ -62,7 +62,7 @@ do
     docker run -d --name $CONTAINER_NAME $IMAGE_NAME
 
     # 等待容器完全启动和日志生成
-    sleep 30
+    sleep 25
     
     # 提取信息并追加到keys.md
     echo "提取 $CONTAINER_NAME 的信息..."
