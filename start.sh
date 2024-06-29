@@ -185,9 +185,9 @@ for i in $(seq $START_NUM $((START_NUM + $CONTAINER_COUNT - 1))); do
 
     # 输出删除操作的结果
     if [ $? -eq 0 ]; then
-        echo "成功启动 $container_name 容器"
+        echo "成功启动 $CONTAINER_NAME 容器"
     else
-        echo "启动失败：$container_name"
+        echo "启动失败：$CONTAINER_NAME"
     fi
 
     # 等待容器完全启动
