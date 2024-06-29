@@ -115,24 +115,13 @@ install_docker_alpine() {
 check_docker
 
 # Docker 登录信息
-DOCKER_USERNAME="zh30"
-DOCKER_PASSWORD="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"
-DOCKER_REGISTRY="ghcr.io"
-IMAGE_NAME="ghcr.io/cssdao/nubit_node:latest"
+IMAGE_NAME="cssshow/nubit_node:latest"
 # 定义最大重试次数
 MAX_RETRIES=5
 
 # 检查 nubit_node:latest 镜像是否存在
 if ! docker image inspect $IMAGE_NAME &>/dev/null; then
     echo "$IMAGE_NAME 镜像不存在，正在尝试登录并拉取..."
-
-    # 登录到 Docker 仓库
-    echo "$DOCKER_PASSWORD" | docker login $DOCKER_REGISTRY -u "$DOCKER_USERNAME" --password-stdin
-
-    if [ $? -ne 0 ]; then
-        echo "Docker 登录失败，请检查凭证。"
-        exit 1
-    fi
 
     # 拉取镜像
     docker pull $IMAGE_NAME
@@ -142,7 +131,7 @@ if ! docker image inspect $IMAGE_NAME &>/dev/null; then
         exit 1
     fi
 
-    echo "镜像已成功拉"
+    echo "镜像已成功拉取"
 else
     echo "$IMAGE_NAME 镜像已存在，继续执行..."
 fi
