@@ -119,6 +119,8 @@ DOCKER_USERNAME="zh30"
 DOCKER_PASSWORD="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"
 DOCKER_REGISTRY="ghcr.io"
 IMAGE_NAME="ghcr.io/cssdao/nubit_node:latest"
+# 定义最大重试次数
+MAX_RETRIES=5
 
 # 检查 nubit_node:latest 镜像是否存在
 if ! docker image inspect $IMAGE_NAME &>/dev/null; then
@@ -185,7 +187,7 @@ for i in $(seq $START_NUM $((START_NUM + $CONTAINER_COUNT - 1))); do
     sleep 1
 done
 
-SLEEPTIME=$((240 + $CONTAINER_COUNT * 2))
+SLEEPTIME=$((240 + $CONTAINER_COUNT * 3))
 echo "所有容器已成功启动。等待 $SLEEPTIME 秒后，执行提取密钥信息"
 
 sleep $SLEEPTIME
@@ -196,19 +198,47 @@ echo "开始执行提取密钥信息动作"
 for i in $(seq $START_NUM $((START_NUM + $CONTAINER_COUNT - 1))); do
     CONTAINER_NAME="nubit$i"
 
-    # 提取信息并追加到 keys.md
-    echo "提取 $CONTAINER_NAME 的信息..."
-    {
-        echo "Container: $CONTAINER_NAME"
+    # 初始化重试计数器
+    retry_count=0
 
-        # 获取容器日志并保存到变量
-        container_logs=$(docker logs $CONTAINER_NAME)
-        echo "Address: $(echo "$container_logs" | grep "ADDRESS:" | sed 's/ADDRESS: //')"
-        echo "Mnemonic: $(echo "$container_logs" | sed -n '/MNEMONIC/,/\*\*/p' | grep -v 'MNEMONIC' | grep -v '\*\*' | tr -d '\n')"
-        echo "Pubkey: $(echo "$container_logs" | grep -A 1 "\*\* PUBKEY \*\*" | tail -n 1)"
-        echo "Authkey: $(echo "$container_logs" | grep -A 1 "\*\* AUTH KEY \*\*" | tail -n 1)"
-        echo "---"
-    } >>keys.md
+    while [ $retry_count -lt $MAX_RETRIES ]; do
+        echo "提取 $CONTAINER_NAME 的信息... (尝试 $((retry_count + 1))/$MAX_RETRIES)"
+
+        # 获取容器日志并保存到变量，同时禁止输出到终端
+        container_logs=$(docker logs $CONTAINER_NAME 2>/dev/null)
+
+        # 提取所需信息
+        address=$(echo "$container_logs" | grep "ADDRESS:" | sed 's/ADDRESS: //')
+        mnemonic=$(echo "$container_logs" | sed -n '/MNEMONIC/,/\*\*/p' | grep -v 'MNEMONIC' | grep -v '\*\*' | tr -d '\n')
+        pubkey=$(echo "$container_logs" | grep -A 1 "\*\* PUBKEY \*\*" | tail -n 1)
+        authkey=$(echo "$container_logs" | grep -A 1 "\*\* AUTH KEY \*\*" | tail -n 1)
+
+        # 检查是否所有信息都已获取
+        if [ -n "$address" ] && [ -n "$mnemonic" ] && [ -n "$pubkey" ] && [ -n "$authkey" ]; then
+            # 所有信息都已获取，写入 keys.md
+            {
+                echo "Container: $CONTAINER_NAME"
+                echo "Address: $address"
+                echo "Mnemonic: $mnemonic"
+                echo "Pubkey: $pubkey"
+                echo "Authkey: $authkey"
+                echo "---"
+            } >>keys.md
+            echo "成功提取 $CONTAINER_NAME 的信息并写入 keys.md"
+            break # 跳出重试循环
+        else
+            # 信息不完整，准备重试
+            echo "无法获取 $CONTAINER_NAME 的完整信息，准备重试..."
+            retry_count=$((retry_count + 1))
+            if [ $retry_count -lt $MAX_RETRIES ]; then
+                sleep 10 # 等待10秒后重试
+            fi
+        fi
+    done
+
+    if [ $retry_count -eq $MAX_RETRIES ]; then
+        echo "警告：无法在 $MAX_RETRIES 次尝试后获取 $CONTAINER_NAME 的完整信息"
+    fi
     sleep 1
 done
 
