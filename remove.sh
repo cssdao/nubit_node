@@ -2,8 +2,8 @@
 
 # 确认步骤
 echo "这个脚本将会删除 Nubit 节点容器，请谨慎操作"
-echo "你确定想删除 Nubit 节点容器吗？输入 'yes' 表示继续"
-read confirmation
+echo -n "你确定想删除 Nubit 节点容器吗？输入 'yes' 表示继续："
+read -r confirmation
 
 # 检查用户输入
 if [ "$confirmation" != "yes" ]; then
