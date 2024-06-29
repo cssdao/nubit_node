@@ -61,25 +61,36 @@ do
     echo "正在启动容器: $CONTAINER_NAME"
     docker run -d --name $CONTAINER_NAME $IMAGE_NAME
 
-    # 等待容器完全启动和日志生成
-    sleep 20
-    
-    # 提取信息并追加到keys.md
+    # 等待容器完全启动
+    sleep 1
+done
+
+SLEEPTIME=$((240 > $CONTAINER_COUNT ? (340-CONTAINER_COUNT) : 100))
+echo "所有容器已成功启动。等待 $SLEEPTIME 秒后，执行提取密钥信息"
+
+sleep $SLEEPTIME
+
+echo "开始执行提取密钥信息动作"
+
+# 循环提取密钥信息并保存到 keys.md
+for i in $(seq 1 $CONTAINER_COUNT)
+do
+    CONTAINER_NAME="nubit$i"
+
+    # 提取信息并追加到 keys.md
     echo "提取 $CONTAINER_NAME 的信息..."
     {
         echo "Container: $CONTAINER_NAME"
 
         # 获取容器日志并保存到变量
         container_logs=$(docker logs $CONTAINER_NAME)
-        echo "address: $(echo "$container_logs" | grep -A1 "ADDRESS:" | awk '{print $2}' )"
-        # docker logs $CONTAINER_NAME | grep -A1 "ADDRESS:" | awk '{print $2}'
-        # docker logs $CONTAINER_NAME | grep -A1 "MNEMONIC (save this somewhere safe\!\!\!):" | awk 'NR>1 {print $1}'
-        # docker logs $CONTAINER_NAME | grep -A1 "\*\* PUBKEY \*\*" | awk '{print $2}'
-        # docker logs $CONTAINER_NAME | grep -A1 "\*\* AUTH KEY \*\*" | awk '{print $2}'
+        echo "Address: $(echo "$container_logs" | grep "ADDRESS:" | sed 's/ADDRESS: //' )"
+        echo "Mnemonic: $(echo "$container_logs" | sed -n '/MNEMONIC/,/\*\*/p' | grep -v 'MNEMONIC' | grep -v '\*\*' | tr -d '\n' )"
+        echo "Pubkey: $(echo "$container_logs" | grep -A 1 "\*\* PUBKEY \*\*" | tail -n 1 )"
+        echo "Authkey: $(echo "$container_logs" | grep -A 1 "\*\* AUTH KEY \*\*" | tail -n 1 )"
         echo "---"
     } >> keys.md
-
-    sleep 2
+    sleep 1
 done
 
 echo "所有容器已启动并记录完成!私钥信息已经在 keys.md 文件中，请谨慎保存。"
