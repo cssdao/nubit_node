@@ -183,6 +183,13 @@ for i in $(seq $START_NUM $((START_NUM + $CONTAINER_COUNT - 1))); do
     echo "正在启动容器: $CONTAINER_NAME"
     docker run -d --name $CONTAINER_NAME $IMAGE_NAME
 
+    # 输出删除操作的结果
+    if [ $? -eq 0 ]; then
+        echo "成功启动 $container_name 容器"
+    else
+        echo "启动失败：$container_name"
+    fi
+
     # 等待容器完全启动
     sleep 1
 done
