@@ -179,6 +179,8 @@ for i in $(seq $START_NUM $((START_NUM + $CONTAINER_COUNT - 1))); do
         echo "启动失败：$CONTAINER_NAME"
     fi
 
+    echo "------------------------"
+
     # 等待容器完全启动
     sleep 1
 done
@@ -238,4 +240,4 @@ for i in $(seq $START_NUM $((START_NUM + $CONTAINER_COUNT - 1))); do
     sleep 1
 done
 
-echo "所有容器已启动并记录完成!私钥信息已经在 keys.md 文件中，请谨慎保存。"
+echo "所有节点私钥信息已经提取到 keys.md 文件中，请谨慎保存。"
