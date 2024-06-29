@@ -65,7 +65,7 @@ do
     sleep 1
 done
 
-SLEEPTIME=$((240 > $CONTAINER_COUNT ? (340-CONTAINER_COUNT) : 100))
+SLEEPTIME=$((240 + $CONTAINER_COUNT * 2))
 echo "所有容器已成功启动。等待 $SLEEPTIME 秒后，执行提取密钥信息"
 
 sleep $SLEEPTIME
