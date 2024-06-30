@@ -170,7 +170,7 @@ echo "将启动 $CONTAINER_COUNT 个容器"
 for i in $(seq $START_NUM $((START_NUM + $CONTAINER_COUNT - 1))); do
     CONTAINER_NAME="nubit$i"
     echo "正在启动容器: $CONTAINER_NAME"
-    docker run -d --name $CONTAINER_NAME $IMAGE_NAME
+    docker run -d --name $CONTAINER_NAME --restart always $IMAGE_NAME
 
     # 输出删除操作的结果
     if [ $? -eq 0 ]; then

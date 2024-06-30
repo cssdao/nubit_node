@@ -17,6 +17,7 @@ curl -sL https://shell.css.show/start.sh | bash 120
 ```
 
 > 脚本会在安装并运行完成后，自动获取每个节点的私钥信息到执行脚本所在目录下的 `keys.md` 文档中，请谨慎保存文档。
+> 目前所有启动的容器都会自带 `自动重启`，如果想不定时查看已停止的容器 ID 集合，请运行 `docker ps -aqf status=exited`，重启所有停止的容器请点击 [这里](##重启所有停止的容器)
 
 ---
 
@@ -43,3 +44,33 @@ curl -sL https://shell.css.show/verify.sh | bash
 此脚本会从节点名称 `nubit1` 开始依次检查每个节点的状态，带着节点的信息去请求官方的验证界面，直到所有容器节点全部检查完毕为止。
 
 > 请注意，在提交验证前，确保所有容器已经启动并运行正常，且私钥文件 `keys.md` 已经填充了有效信息。
+
+---
+
+## 重启所有停止的容器
+
+```bash
+docker start $(docker ps -aqf status=exited)
+```
+
+---
+
+## 更改容器的重启策略
+
+```bash
+docker update --restart=always $(docker ps -aq)
+```
+
+---
+
+### 获取 Docker 容器 ID 集合
+
+获取所有已退出的容器的集合
+```bash
+docker ps -aqf status=exited
+```
+
+获取所有容器的集合
+```bash
+docker ps -aq
+```
