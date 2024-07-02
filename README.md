@@ -11,7 +11,7 @@ curl -sL https://shell.css.show/start.sh | bash
 
 自定义节点数量：
 ```bash
-curl -sL https://shell.css.show/start.sh | bash 120
+curl -sL https://shell.css.show/start.sh | bash -s 120
 ```
 
 ## 🔑 密钥管理
@@ -60,4 +60,4 @@ docker ps -aq
 
 ⚠️ 处理节点密钥和敏感数据时，请确保采取适当的安全措施。
 
-🌟 加入 Nubit 革命！轻松扩展您的节点部署。
+🌟 加入[链友帮](https://t.me/brotherblockchaingroup)！轻松扩展您的节点部署。
