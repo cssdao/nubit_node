@@ -149,7 +149,7 @@ fi
 echo "将从容器编号 $START_NUM 开始启动新容器"
 
 # 设置默认容器数量
-DEFAULT_COUNT=30
+DEFAULT_COUNT=10
 
 # 检查是否提供了命令行参数
 if [ $# -gt 0 ]; then
